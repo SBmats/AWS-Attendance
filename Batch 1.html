@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Attendance Switch - Batch 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f0f2f5;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .center {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ccc;
+      }
+      th {
+        background-color: #343a40;
+        color: white;
+      }
+      .present {
+        background-color: #d4edda;
+      }
+      .absent {
+        background-color: #f8d7da;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Attendance - Batch 1</h1>
+    <h1></h1>
+    <div class="summary" id="summary">
+      <h2>Students: 0 Present: 0 Absent: 0</h2>
+    </div>
+
+    <div class="center">
+      <button onclick="downloadExcel()">📥 Attendance Report</button>
+    </div>
+
+    <table id="attendanceTable">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Roll Number</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Action</th>
+          <th>Branch</th>
+          <th>Section</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <script>
+      const students = [
+        {
+          roll: "	22A21A5402	",
+          name: "	AKULA.LEKHANASAI	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5403	",
+          name: "	ALLENA HARIBABU	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5404	",
+          name: "	ALLU SATYANARAYANA MURTHY	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5415	",
+          name: "	CHINTA MUNEESWARI	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5416	",
+          name: "	CHINTALAPUDI SRAVANTHI	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5418	",
+          name: "	saikrishna gajula	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5436	",
+          name: "	Durga Nagendra Kumar Muddala	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5437	",
+          name: "	tejasri nookala	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5442	",
+          name: "	Pinabakala Nageswararao 	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5447	",
+          name: "	sheshapalli Naga Jahnavi	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A5448	",
+          name: "	SIRIGINEEDI GAYATHRI	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	23A25A5403	",
+          name: "	Kudipudi Naga Veera Venkata Satyanarayana	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	23A25A5406	",
+          name: "	NARAM MANIKUMAR	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	23A25A5408	",
+          name: "	srinivasula rama manojna	",
+          branch: "	AI&DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6107	",
+          name: "	BODDU MEENAKSHI	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6114	",
+          name: "	CH.PUJITHA NAGENDRESWARI	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6120	",
+          name: "	Donga Venkata Ramana	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6125	",
+          name: "	Gubbala Satya Nagendra	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6127	",
+          name: "	Gurrala Chinnari	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6128	",
+          name: "	Guttula Devi Varshitha	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6132	",
+          name: "	J Mounika	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6136	",
+          name: "	ABHIRAM KANITI	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6148	",
+          name: "	Kolla.Sravanthi	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6157	",
+          name: "	Mandapaka Chinni Durga Vara Prasad 	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6160	",
+          name: "	M.praveen kumar reddy	",
+          branch: "	AI&ML	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0501	",
+          name: "	ADABALA GREESHMA	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0502	",
+          name: "	ADDALA KANTHI KIAN 	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0507	",
+          name: "	ADDANKI KALYANI	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0510	",
+          name: "	Akana Sri Venkata Narasimha	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0517	",
+          name: "	GUBBALA P V DURGA MALLESWARA RAO	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0519	",
+          name: "	APPALA NAGENDRA VARMA	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0520	",
+          name: "	ARASAVALLI CHANDRASEKHAR	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0525	",
+          name: "	BADDE RATNAVALLI	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0527	",
+          name: "	Badugu Vanisha	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0536	",
+          name: "	BELLAMKONDA HIMA LAKSHMI NARAYANA	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0544	",
+          name: "	CHALLA NAGA SATYA RAMA CHARAN	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0545	",
+          name: "	Ch Teja Surya	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0550	",
+          name: "	J LEELA SRIRAM	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0555	",
+          name: "	ACHANTA NAGA SURYA PAVAN KUMAR	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        { roll: "	22A21A0557	", name: "	JONNA HARI	", branch: "	CSE	", section: "	A	" },
+        { roll: "	22A21A0562	", name: "	U SWETHA	", branch: "	CSE	", section: "	A	" },
+        {
+          roll: "	22A21A05D4	",
+          name: "	Karimsetti Pavani	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05E1	",
+          name: "	KATNAM SAI SRI SIVA SUMANJALI	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05E6	",
+          name: "	Ketha Bhargavi	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05E8	",
+          name: "	Kodali Varshitha	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        { roll: "	22A21A05F8	", name: "	k.maidhili	", branch: "	CSE	", section: "	C	" },
+        {
+          roll: "	22A21A05G6	",
+          name: "	K.Rishita priya	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05G7	",
+          name: "	Uppuluri Yuva Madhuri	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05I3	",
+          name: "	M.Divya Savitri	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05I7	",
+          name: "	Maddula Yamini	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05J7	",
+          name: "	MANGINENI VARALAKSHMI	",
+          branch: "	CSE	",
+          section: "	C	",
+        },
+        {
+          roll: "	22A21A05Q6	",
+          name: "	SALADI LOKESH SUDHEER KRISHNA	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	22A21A05S1	",
+          name: "	SREE MALAVIKA KANCHARLA	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	22A21A05T9	",
+          name: "	TIRUMNAI HIMASRI	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        { roll: "	22A21A05U0	", name: "	MOHAN	", branch: "	CSE	", section: "	E	" },
+        {
+          roll: "	22A21A05U4	",
+          name: "	GUTTULA BHARGAVI	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	22A21A05V0	",
+          name: "	Vallabha Siva Sai Ratna	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	22A21A05V5	",
+          name: "	vathadi sruthi	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	22A21A05V7	",
+          name: "	Vatala Yaswitha	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	22A21A05W2	",
+          name: "	maddala lakshmisai	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	23A25A0502	",
+          name: "	CHANDANAPALLI CHANDU	",
+          branch: "	CSE	",
+          section: "	A	",
+        },
+        {
+          roll: "	23A25A0526	",
+          name: "	Nagidi Jahnavi	",
+          branch: "	CSE	",
+          section: "	E	",
+        },
+        {
+          roll: "	22A21A6504	",
+          name: "	akana.geethika durga tulasi	",
+          branch: "	CSE-BS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6507	",
+          name: "	Balabhadra Sri Ranga Mani Rekha	",
+          branch: "	CSE-BS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6517	",
+          name: "	I Swarna	",
+          branch: "	CSE-BS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6536	",
+          name: "	PENDELA RUPESH SATYANARAYANA	",
+          branch: "	CSE-BS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6540	",
+          name: "	REKAPALLI SRIRAMA KAVYA	",
+          branch: "	CSE-BS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A6541	",
+          name: "	routhula surya ratna pavani	",
+          branch: "	CSE-BS	",
+          section: "	A	",
+        },
+        {
+          roll: "	23A25A6504	",
+          name: "	saladi santhosh kumar	",
+          branch: "	CSE-BS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A4413	",
+          name: "	Donga Sivaji	",
+          branch: "	CSE-DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A4423	",
+          name: "	KATTULA VYSHNAVI DEVI	",
+          branch: "	CSE-DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A4424	",
+          name: "	kolla venkata rama harsha vardhan	",
+          branch: "	CSE-DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A4425	",
+          name: "	KOMMANA VENKATA SATYANARAYANA	",
+          branch: "	CSE-DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A4461	",
+          name: "	VELAGALA JAYA NAGA SANTHOSH REDDY	",
+          branch: "	CSE-DS	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A0444	",
+          name: "	chelluboina Naresh	",
+          branch: "	ECE	",
+          section: "	A	",
+        },
+        {
+          roll: "	22A21A04F1	",
+          name: "	MYLA RAGHU SAI	",
+          branch: "	ECE	",
+          section: "	C	",
+        },
+        {
+          roll: "	23A25A0404	",
+          name: "	BOLLA PRAVEEN	",
+          branch: "	ECE	",
+          section: "	A	",
+        },
+
+        // Add more students as needed
+      ];
+
+      const tbody = document.getElementById("tableBody");
+      const summary = document.getElementById("summary");
+
+      students.forEach((student, index) => {
+        const row = document.createElement("tr");
+        row.classList.add("present");
+
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${student.roll.trim()}</td>
+          <td>${student.name.trim()}</td>
+          <td class="status">P</td>
+          <td><button onclick="toggleStatus(this)">Toggle</button></td>
+          <td>${student.branch.trim()}</td>
+          <td>${student.section.trim()}</td>
+        `;
+
+        tbody.appendChild(row);
+      });
+
+      updateSummary();
+
+      function toggleStatus(button) {
+        const row = button.closest("tr");
+        const statusCell = row.querySelector(".status");
+
+        if (row.classList.contains("present")) {
+          row.classList.remove("present");
+          row.classList.add("absent");
+          statusCell.textContent = "Absent";
+        } else {
+          row.classList.remove("absent");
+          row.classList.add("present");
+          statusCell.textContent = "P";
+        }
+
+        updateSummary();
+      }
+
+      function updateSummary() {
+        const total = students.length;
+        const present = document.querySelectorAll("tr.present").length;
+        const absent = total - present;
+
+        summary.textContent = `Total Students: ${total} | Present: ${present} | Absent: ${absent}`;
+      }
+
+      function downloadExcel() {
+        const rows = document.querySelectorAll("#attendanceTable tbody tr");
+        const data = [
+          ["S.No", "Roll Number", "Name", "Status", "Branch", "Section"],
+        ];
+
+        rows.forEach((row, index) => {
+          const cells = row.querySelectorAll("td");
+          const sno = index + 1;
+          const roll = cells[1].textContent.trim();
+          const name = cells[2].textContent.trim();
+          const status = cells[3].textContent.trim();
+          const branch = cells[5].textContent.trim();
+          const section = cells[6].textContent.trim();
+
+          data.push([sno, roll, name, status, branch, section]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+        XLSX.writeFile(wb, "AWS_Training_Attendance_Batch_2.xlsx");
+      }
+    </script>
+  </body>
+</html>
